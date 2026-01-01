@@ -1,0 +1,18 @@
+Name: iterative
+Host: 0.0.0.0
+Port: 12016
+
+# 日志配置
+Log:
+  Level: debug                    # 日志级别: debug, info, warn, error, fatal
+  Mode: console                     # 输出模式: console, file, volume
+  Encoding: json                 # 输出格式: json, plain
+  Path: ./logs                   # 日志文件路径（当Mode为file时）
+  MaxSize: 10                    # 单个日志文件最大大小(MB)
+  MaxBackups: 5                  # 保留旧文件的最大个数
+  MaxAge: 30                     # 保留旧文件的最大天数
+  Compress: true                 # 是否压缩旧文件
+
+LLM:
+  ApiKey: "sk-5a52357f6b234c5987cb1bef8cba3756"
+  Model: "qwen-plus"

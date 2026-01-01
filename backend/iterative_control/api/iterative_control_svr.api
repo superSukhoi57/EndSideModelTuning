@@ -1,0 +1,31 @@
+type Base {
+	Code      int32  `json:"code"`
+	Message   string `json:"message"`
+	Timestamp int64  `json:"timestamp"`
+}
+
+// 定义请求结构体
+type QuestionReq {
+	Question string `json:"question"`
+}
+
+// 定义响应结构体
+type AnswerResp {
+	Base   Base   `json:"base"`
+	Answer string `json:"answer"`
+}
+
+// 定义服务公共前缀
+@server (
+	// 公共前缀，所有路由都会加上这个前缀
+	prefix: /api/v1
+    // 服务分组，会在handler和logic下生成对应的目录
+	group:  test
+)
+// 定义服务接口
+service iterative {
+	// 提问接口
+	@handler questionHandler
+	post /question (QuestionReq) returns (AnswerResp)
+}
+
