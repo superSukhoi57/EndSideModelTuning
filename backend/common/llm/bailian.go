@@ -38,6 +38,7 @@ func (b *BLClient) Chat(msg string) (answer string) {
 		},
 	)
 
+	
 	if err != nil {
 		log.Println(err.Error())
 	}
@@ -46,4 +47,5 @@ func (b *BLClient) Chat(msg string) (answer string) {
 	println(answer)
 	return
 
-}
+} 
+

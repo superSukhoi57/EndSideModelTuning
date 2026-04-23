@@ -1,0 +1,48 @@
+# YAML 配置文件
+*.yaml
+*.yml
+
+# Go
+*.exe
+*.out
+*.o
+*.a
+*.so
+*.dylib
+test.test
+*.prof
+coverage.txt
+*.log
+go.sum
+vendor/
+
+# Node.js
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+package-lock.json
+dist/
+build/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+
+# 环境变量
+.env
+.env.local
+.env.*.local
+
+# 临时文件
+*.tmp
+*.temp
+*.bak
+*.swp
