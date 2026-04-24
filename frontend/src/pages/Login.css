@@ -3,21 +3,49 @@
   justify-content: center;
   align-items: center;
   min-height: 100vh;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: url('../../public/gemini_sztu.png') no-repeat center center fixed;
+  background-size: cover;
+}
+
+.login-container::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.3);
+  z-index: 0;
+}
+
+.login-container>* {
+  position: relative;
+  z-index: 1;
 }
 
 .login-card {
+  margin-top: -160px;
+  /* 负数 = 往上移，数值越大移得越多 */
   background: white;
   border-radius: 16px;
-  padding: 40px;
+  padding: 25px;
   box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1);
   text-align: center;
+  /* 新增下面 4 行，解决高度跳动 */
+  width: 320px;
+  /* 固定宽度 */
+  height: 480px;
+  /* 固定高度（足够放下二维码+标题） */
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-start;
 }
 
 .login-title {
   margin: 0 0 10px 0;
   font-size: 28px;
-  color: #333;
+  color: #0b76f0;
   font-weight: 600;
 }
 
