@@ -1,6 +1,7 @@
 interface AppConfig {
     auth: string;
     interaction: string;
+    loginTimeoutSec: number;
 }
 
 let config: AppConfig = {} as AppConfig;

@@ -1,4 +1,5 @@
 {
     "auth": "http://47.115.225.81:12300",
-    "interaction": "http://47.115.225.81:12301"
+    "interaction": "http://47.115.225.81:12301",
+    "loginTimeoutSec": 300
 }

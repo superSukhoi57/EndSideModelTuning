@@ -19,7 +19,9 @@ declare global {
 const Login: React.FC = () => {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState('');
+    const [showExpiredModal, setShowExpiredModal] = useState(false);
     const qrLoginObjRef = useRef<any>(null);
+    const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
     // 修复：使用锁，确保整个生命周期只初始化一次
     const initializedRef = useRef(false);
@@ -61,6 +63,10 @@ const Login: React.FC = () => {
                 qrLoginObjRef.current = null;
             }
             window.removeEventListener('message', handleMessage);
+            if (timerRef.current) {
+                clearTimeout(timerRef.current);
+                timerRef.current = null;
+            }
         };
     }, []);
 
@@ -69,6 +75,14 @@ const Login: React.FC = () => {
             const response = await fetch(`${config.auth}/state`);
             if (!response.ok) throw new Error('Failed to fetch state');
             const data = await response.json();
+
+            if (timerRef.current) {
+                clearTimeout(timerRef.current);
+            }
+            timerRef.current = setTimeout(() => {
+                setShowExpiredModal(true);
+            }, config.loginTimeoutSec * 1000);
+
             return data.state;
         } catch (error) {
             console.error('Error fetching state:', error);
@@ -157,6 +171,17 @@ const Login: React.FC = () => {
                     </>
                 )}
             </div>
+            {showExpiredModal && (
+                <div className="modal-overlay">
+                    <div className="modal-content">
+                        <h2 className="modal-title">太久未操作</h2>
+                        <p className="modal-message">状态已失效，请刷新页面</p>
+                        <button className="modal-button" onClick={() => window.location.reload()}>
+                            刷新页面
+                        </button>
+                    </div>
+                </div>
+            )}
         </div>
     );
 };
