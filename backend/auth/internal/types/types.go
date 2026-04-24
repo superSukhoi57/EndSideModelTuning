@@ -5,6 +5,13 @@ type CallbackReq struct {
 	State string `form:"state"`
 }
 
+type StateReq struct{}
+
+type StateResp struct {
+	Base  BaseResp `json:"base"`
+	State string   `json:"state"`
+}
+
 type BaseResp struct {
 	Code      int    `json:"code"`
 	Message   string `json:"message"`

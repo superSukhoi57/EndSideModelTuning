@@ -15,6 +15,11 @@ func RegisterHandlers(server *rest.Server, serverCtx *svc.ServiceContext) {
 				Path:    "/callback",
 				Handler: callbackHandler(serverCtx),
 			},
+			{
+				Method:  http.MethodGet,
+				Path:    "/state",
+				Handler: stateHandler(serverCtx),
+			},
 		},
 	)
 }

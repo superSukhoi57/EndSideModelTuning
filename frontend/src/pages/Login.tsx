@@ -3,6 +3,7 @@ import './Login.css';
 
 const FEISHU_APP_ID = 'cli_a960a3aa0db89bd5';
 const REDIRECT_URI = 'http://47.115.225.81:12300/callback';
+const API_BASE_URL = 'http://47.115.225.81:12300';
 
 declare global {
     interface Window {
@@ -15,72 +16,99 @@ const Login: React.FC = () => {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState('');
     const qrLoginObjRef = useRef<any>(null);
-    const isInitRef = useRef(false); // 新增：标记是否已初始化
+
+    // 修复：使用锁，确保整个生命周期只初始化一次
+    const initializedRef = useRef(false);
 
     useEffect(() => {
-        // 防止严格模式下重复执行
-        if (isInitRef.current) return;
+        // 严格模式下也强制只执行一次
+        if (initializedRef.current) return;
+        initializedRef.current = true;
 
-        const script = document.createElement('script');
-        script.src = 'https://lf-package-cn.feishucdn.com/obj/feishu-static/lark/passport/qrcode/LarkSSOSDKWebQRCode-1.0.3.js';
-        script.async = true;
-        script.onload = () => {
-            setTimeout(() => {
+        const init = async () => {
+            // 防止重复插入脚本
+            if (document.querySelector('script[src*="LarkSSOSDKWebQRCode"]')) {
+                await new Promise(resolve => setTimeout(resolve, 300));
                 initFeishuQRCode();
-            }, 300);
-        };
-        script.onerror = () => {
-            setError('二维码加载失败');
-            setLoading(false);
-        };
-        document.body.appendChild(script);
-        isInitRef.current = true; // 标记已初始化
+                return;
+            }
 
+            const script = document.createElement('script');
+            script.src = 'https://lf-package-cn.feishucdn.com/obj/feishu-static/lark/passport/qrcode/LarkSSOSDKWebQRCode-1.0.3.js';
+            script.async = true;
+            script.onload = () => {
+                setTimeout(() => {
+                    initFeishuQRCode();
+                }, 300);
+            };
+            script.onerror = () => {
+                setError('二维码加载失败');
+                setLoading(false);
+            };
+            document.body.appendChild(script);
+        };
+
+        init();
+
+        // 清理逻辑
         return () => {
-            // 清理：移除脚本、销毁二维码实例、移除监听
-            const existingScript = document.querySelector('script[src*="LarkSSOSDKWebQRCode"]');
-            if (existingScript?.parentNode) existingScript.parentNode.removeChild(existingScript);
-            if (qrLoginObjRef.current?.destroy) qrLoginObjRef.current.destroy();
+            if (qrLoginObjRef.current?.destroy) {
+                qrLoginObjRef.current.destroy();
+                qrLoginObjRef.current = null;
+            }
             window.removeEventListener('message', handleMessage);
-            isInitRef.current = false; // 重置标记
         };
     }, []);
 
-    // 抽离成独立函数，方便移除监听
-    const handleMessage = (event: MessageEvent) => {
+    const fetchState = async (): Promise<string> => {
+        try {
+            const response = await fetch(`${API_BASE_URL}/state`);
+            if (!response.ok) throw new Error('Failed to fetch state');
+            const data = await response.json();
+            return data.state;
+        } catch (error) {
+            console.error('Error fetching state:', error);
+            throw error;
+        }
+    };
+
+    // 缓存监听函数，防止重复绑定
+    const handleMessage = useRef(async (event: MessageEvent) => {
         if (
             qrLoginObjRef.current &&
             qrLoginObjRef.current.matchOrigin(event.origin) &&
             qrLoginObjRef.current.matchData(event.data)
         ) {
             const loginTmpCode = event.data.tmp_code;
-            const state = generateState();
+            const state = await fetchState();
             localStorage.setItem('feishu_auth_state', state);
             const redirectUri = encodeURIComponent(REDIRECT_URI);
             const goto = `https://passport.feishu.cn/suite/passport/oauth/authorize?client_id=${FEISHU_APP_ID}&redirect_uri=${redirectUri}&response_type=code&state=${state}`;
             window.location.href = `${goto}&tmp_code=${loginTmpCode}`;
         }
-    };
+    }).current;
 
-    const initFeishuQRCode = () => {
+    const initFeishuQRCode = async () => {
         const container = document.getElementById('feishu-login-container');
         if (!container) {
-            console.error('Container element not found');
             setError('二维码容器未找到');
             setLoading(false);
             return;
         }
-        // 关键：清空容器，防止叠加
-        container.innerHTML = '';
 
-        const state = generateState();
-        localStorage.setItem('feishu_auth_state', state);
-        const redirectUri = encodeURIComponent(REDIRECT_URI);
-        const goto = `https://passport.feishu.cn/suite/passport/oauth/authorize?client_id=${FEISHU_APP_ID}&redirect_uri=${redirectUri}&response_type=code&state=${state}`;
+        // 强制清空容器 + 销毁旧实例
+        container.innerHTML = '';
+        if (qrLoginObjRef.current?.destroy) {
+            qrLoginObjRef.current.destroy();
+            qrLoginObjRef.current = null;
+        }
 
         try {
-            // 先销毁旧实例
-            if (qrLoginObjRef.current?.destroy) qrLoginObjRef.current.destroy();
+            const state = await fetchState();
+            localStorage.setItem('feishu_auth_state', state);
+            const redirectUri = encodeURIComponent(REDIRECT_URI);
+            const goto = `https://passport.feishu.cn/suite/passport/oauth/authorize?client_id=${FEISHU_APP_ID}&redirect_uri=${redirectUri}&response_type=code&state=${state}`;
+
             qrLoginObjRef.current = window.QRLogin!({
                 id: 'feishu-login-container',
                 goto: goto,
@@ -89,7 +117,7 @@ const Login: React.FC = () => {
                 style: 'width:300px;height:400px;',
             });
 
-            // 先移除旧监听，再添加新监听
+            // 只绑定一次监听
             window.removeEventListener('message', handleMessage);
             window.addEventListener('message', handleMessage, false);
 
@@ -99,10 +127,6 @@ const Login: React.FC = () => {
             setError('二维码组件初始化失败: ' + e.message);
             setLoading(false);
         }
-    };
-
-    const generateState = (): string => {
-        return Math.random().toString(36).substring(2) + Date.now().toString(36);
     };
 
     return (

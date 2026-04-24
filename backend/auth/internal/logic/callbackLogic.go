@@ -1,9 +1,9 @@
 package logic
 
 import (
-	"bytes"
 	"auth/internal/svc"
 	"auth/internal/types"
+	"bytes"
 	"context"
 	"encoding/json"
 	"errors"
@@ -11,6 +11,8 @@ import (
 	"io"
 	"net/http"
 	"time"
+
+	"github.com/zeromicro/go-zero/core/logx"
 )
 
 type CallbackLogic struct {
@@ -26,6 +28,18 @@ func NewCallbackLogic(ctx context.Context, svcCtx *svc.ServiceContext) *Callback
 }
 
 func (l *CallbackLogic) Callback(req *types.CallbackReq) (*types.CallbackResp, error) {
+
+	logx.Infof("Callback req: %v", req)
+	if req.State == "" {
+		return nil, errors.New("missing state")
+	}
+	valid, err := l.svcCtx.StateDAO.ValidateState(l.ctx, req.State)
+	if err != nil {
+		return nil, fmt.Errorf("failed to validate state: %w", err)
+	}
+	if !valid {
+		return nil, errors.New("invalid state")
+	}
 	if req.Code == "" {
 		return nil, errors.New("missing authorization code")
 	}
@@ -82,45 +96,45 @@ type UserAccessTokenResp struct {
 
 func (l *CallbackLogic) getAppAccessToken() (string, error) {
 	tokenURL := "https://open.feishu.cn/open-apis/auth/v3/app_access_token/internal"
-	
+
 	reqBody := map[string]string{
 		"app_id":     l.svcCtx.Config.FeishuAuth.AppID,
 		"app_secret": l.svcCtx.Config.FeishuAuth.AppSecret,
 	}
-	
+
 	jsonBody, err := json.Marshal(reqBody)
 	if err != nil {
 		return "", fmt.Errorf("failed to marshal request body: %w", err)
 	}
-	
+
 	req, err := http.NewRequestWithContext(l.ctx, "POST", tokenURL, bytes.NewBuffer(jsonBody))
 	if err != nil {
 		return "", fmt.Errorf("failed to create request: %w", err)
 	}
-	
+
 	req.Header.Set("Content-Type", "application/json; charset=utf-8")
-	
+
 	client := &http.Client{Timeout: 10 * time.Second}
 	resp, err := client.Do(req)
 	if err != nil {
 		return "", fmt.Errorf("failed to send request: %w", err)
 	}
 	defer resp.Body.Close()
-	
+
 	body, err := io.ReadAll(resp.Body)
 	if err != nil {
 		return "", fmt.Errorf("failed to read response body: %w", err)
 	}
-	
+
 	var tokenResp AppAccessTokenResp
 	if err := json.Unmarshal(body, &tokenResp); err != nil {
 		return "", fmt.Errorf("failed to unmarshal response: %w", err)
 	}
-	
+
 	if tokenResp.Code != 0 {
 		return "", fmt.Errorf("feishu API error: code=%d, msg=%s", tokenResp.Code, tokenResp.Msg)
 	}
-	
+
 	return tokenResp.AppAccessToken, nil
 }
 
@@ -131,46 +145,46 @@ func (l *CallbackLogic) getAccessToken(code string) (*UserAccessTokenResp, error
 	}
 
 	tokenURL := "https://open.feishu.cn/open-apis/authen/v1/oidc/access_token"
-	
+
 	reqBody := map[string]string{
 		"grant_type": "authorization_code",
 		"code":       code,
 	}
-	
+
 	jsonBody, err := json.Marshal(reqBody)
 	if err != nil {
 		return nil, fmt.Errorf("failed to marshal request body: %w", err)
 	}
-	
+
 	req, err := http.NewRequestWithContext(l.ctx, "POST", tokenURL, bytes.NewBuffer(jsonBody))
 	if err != nil {
 		return nil, fmt.Errorf("failed to create request: %w", err)
 	}
-	
+
 	req.Header.Set("Content-Type", "application/json; charset=utf-8")
 	req.Header.Set("Authorization", "Bearer "+appAccessToken)
-	
+
 	client := &http.Client{Timeout: 10 * time.Second}
 	resp, err := client.Do(req)
 	if err != nil {
 		return nil, fmt.Errorf("failed to send request: %w", err)
 	}
 	defer resp.Body.Close()
-	
+
 	body, err := io.ReadAll(resp.Body)
 	if err != nil {
 		return nil, fmt.Errorf("failed to read response body: %w", err)
 	}
-	
+
 	var tokenResp UserAccessTokenResp
 	if err := json.Unmarshal(body, &tokenResp); err != nil {
 		return nil, fmt.Errorf("failed to unmarshal response: %w", err)
 	}
-	
+
 	if tokenResp.Code != 0 {
 		return nil, fmt.Errorf("feishu API error: code=%d, msg=%s", tokenResp.Code, tokenResp.Msg)
 	}
-	
+
 	return &tokenResp, nil
 }
 
@@ -191,35 +205,35 @@ type UserInfoResp struct {
 
 func (l *CallbackLogic) getUserInfo(accessToken string, refreshToken string) (*types.UserInfo, error) {
 	userInfoURL := "https://open.feishu.cn/open-apis/authen/v1/user_info"
-	
+
 	req, err := http.NewRequestWithContext(l.ctx, "GET", userInfoURL, nil)
 	if err != nil {
 		return nil, fmt.Errorf("failed to create request: %w", err)
 	}
-	
+
 	req.Header.Set("Authorization", "Bearer "+accessToken)
-	
+
 	client := &http.Client{Timeout: 10 * time.Second}
 	resp, err := client.Do(req)
 	if err != nil {
 		return nil, fmt.Errorf("failed to send request: %w", err)
 	}
 	defer resp.Body.Close()
-	
+
 	body, err := io.ReadAll(resp.Body)
 	if err != nil {
 		return nil, fmt.Errorf("failed to read response body: %w", err)
 	}
-	
+
 	var userInfoResp UserInfoResp
 	if err := json.Unmarshal(body, &userInfoResp); err != nil {
 		return nil, fmt.Errorf("failed to unmarshal response: %w", err)
 	}
-	
+
 	if userInfoResp.Code != 0 {
 		return nil, fmt.Errorf("feishu API error: code=%d, msg=%s", userInfoResp.Code, userInfoResp.Msg)
 	}
-	
+
 	userInfo := &types.UserInfo{
 		OpenId:     userInfoResp.Data.OpenId,
 		UnionId:    userInfoResp.Data.UnionId,
@@ -230,7 +244,7 @@ func (l *CallbackLogic) getUserInfo(accessToken string, refreshToken string) (*t
 		AvatarUrl:  userInfoResp.Data.AvatarUrl,
 		TenantName: userInfoResp.Data.TenantKey,
 	}
-	
+
 	fmt.Printf("=== Feishu User Info ===\n")
 	fmt.Printf("Open ID: %s\n", userInfo.OpenId)
 	fmt.Printf("Union ID: %s\n", userInfo.UnionId)
@@ -243,6 +257,6 @@ func (l *CallbackLogic) getUserInfo(accessToken string, refreshToken string) (*t
 	fmt.Printf("Access Token: %s\n", accessToken)
 	fmt.Printf("Refresh Token: %s\n", refreshToken)
 	fmt.Printf("========================\n")
-	
+
 	return userInfo, nil
 }
