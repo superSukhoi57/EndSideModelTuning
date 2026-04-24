@@ -1,5 +1,11 @@
 package types
 
+import "errors"
+
+var (
+	ErrTokenRevoked = errors.New("token has been revoked")
+)
+
 type CallbackReq struct {
 	Code  string `form:"code"`
 	State string `form:"state"`
@@ -30,6 +36,36 @@ type UserInfo struct {
 }
 
 type CallbackResp struct {
-	Base     BaseResp `json:"base"`
-	UserInfo UserInfo `json:"user_info"`
+	Base         BaseResp `json:"base"`
+	UserInfo     UserInfo `json:"user_info"`
+	AccessToken  string   `json:"access_token"`
+	RefreshToken string   `json:"refresh_token"`
+}
+
+type RefreshTokenReq struct {
+	RefreshToken string `json:"refresh_token"`
+}
+
+type RefreshTokenResp struct {
+	Base         BaseResp `json:"base"`
+	AccessToken  string   `json:"access_token"`
+	RefreshToken string   `json:"refresh_token"`
+}
+
+type VerifyTokenReq struct {
+	AccessToken string `form:"access_token"`
+}
+
+type VerifyTokenResp struct {
+	Base   BaseResp `json:"base"`
+	UserID int64    `json:"user_id"`
+	Role   string   `json:"role"`
+}
+
+type LogoutReq struct {
+	AccessToken string `json:"access_token"`
+}
+
+type LogoutResp struct {
+	Base BaseResp `json:"base"`
 }

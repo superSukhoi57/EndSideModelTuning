@@ -29,7 +29,7 @@ func (d *StateDAO) GenerateAndStoreState(ctx context.Context, ttl time.Duration)
 		return "", fmt.Errorf("failed to generate state: %w", err)
 	}
 
-	key := fmt.Sprintf("auth:state:%s", state)
+	key := KeyStatePrefix + state
 	if err := d.rdb.Set(ctx, key, "1", ttl).Err(); err != nil {
 		return "", fmt.Errorf("failed to store state in redis: %w", err)
 	}
@@ -38,7 +38,7 @@ func (d *StateDAO) GenerateAndStoreState(ctx context.Context, ttl time.Duration)
 }
 
 func (d *StateDAO) ValidateState(ctx context.Context, state string) (bool, error) {
-	key := fmt.Sprintf("auth:state:%s", state)
+	key := KeyStatePrefix + state
 	exists, err := d.rdb.Exists(ctx, key).Result()
 	if err != nil {
 		return false, fmt.Errorf("failed to validate state: %w", err)

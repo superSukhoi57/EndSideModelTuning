@@ -22,4 +22,25 @@ func RegisterHandlers(server *rest.Server, serverCtx *svc.ServiceContext) {
 			},
 		},
 	)
+
+	server.AddRoutes(
+		[]rest.Route{
+			{
+				Method:  http.MethodPost,
+				Path:    "/refresh",
+				Handler: refreshTokenHandler(serverCtx),
+			},
+			{
+				Method:  http.MethodGet,
+				Path:    "/verify",
+				Handler: verifyTokenHandler(serverCtx),
+			},
+			{
+				Method:  http.MethodPost,
+				Path:    "/logout",
+				Handler: logoutHandler(serverCtx),
+			},
+		},
+		rest.WithPrefix("/auth/token"),
+	)
 }

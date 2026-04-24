@@ -23,8 +23,37 @@ type UserInfo {
 }
 
 type CallbackResp {
-	Base     Base     `json:"base"`
-	UserInfo UserInfo `json:"user_info"`
+	Base        Base     `json:"base"`
+	UserInfo    UserInfo `json:"user_info"`
+	AccessToken string   `json:"access_token"`
+}
+
+type RefreshTokenReq {
+	RefreshToken string `json:"refresh_token"`
+}
+
+type RefreshTokenResp {
+	Base         BaseResp `json:"base"`
+	AccessToken  string   `json:"access_token"`
+	RefreshToken string   `json:"refresh_token"`
+}
+
+type VerifyTokenReq {
+	AccessToken string `form:"access_token"`
+}
+
+type VerifyTokenResp {
+	Base   BaseResp `json:"base"`
+	UserID int64    `json:"user_id"`
+	Role   string   `json:"role"`
+}
+
+type LogoutReq {
+	AccessToken string `json:"access_token"`
+}
+
+type LogoutResp {
+	Base BaseResp `json:"base"`
 }
 
 @server (
@@ -33,4 +62,13 @@ type CallbackResp {
 service auth {
 	@handler callbackHandler
 	get /callback (CallbackReq) returns (CallbackResp)
+
+	@handler refreshTokenHandler
+	post /token/refresh (RefreshTokenReq) returns (RefreshTokenResp)
+
+	@handler verifyTokenHandler
+	get /token/verify (VerifyTokenReq) returns (VerifyTokenResp)
+
+	@handler logoutHandler
+	post /token/logout (LogoutReq) returns (LogoutResp)
 }

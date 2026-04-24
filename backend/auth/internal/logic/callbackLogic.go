@@ -1,6 +1,7 @@
 package logic
 
 import (
+	"auth/internal/model"
 	"auth/internal/svc"
 	"auth/internal/types"
 	"bytes"
@@ -12,6 +13,9 @@ import (
 	"net/http"
 	"time"
 
+	commonjwt "backend/common/jwt"
+
+	"github.com/bwmarrin/snowflake"
 	"github.com/zeromicro/go-zero/core/logx"
 )
 
@@ -54,13 +58,53 @@ func (l *CallbackLogic) Callback(req *types.CallbackReq) (*types.CallbackResp, e
 		return nil, fmt.Errorf("failed to get user info: %w", err)
 	}
 
+	user, err := l.svcCtx.UserDAO.FindByUnionID(l.ctx, userInfo.UnionId)
+	if err != nil {
+		return nil, fmt.Errorf("failed to find user: %w", err)
+	}
+
+	if user == nil {
+		node, _ := snowflake.NewNode(1)
+		user = &model.User{
+			ID:          node.Generate().Int64(),
+			LarkUnionID: userInfo.UnionId,
+			LarkAvatar:  userInfo.AvatarUrl,
+			Username:    userInfo.Name,
+			Role:        `{"role":"user"}`,
+			Deleted:     0,
+		}
+		if err := l.svcCtx.UserDAO.Create(l.ctx, user); err != nil {
+			return nil, fmt.Errorf("failed to create user: %w", err)
+		}
+	}
+
+	claims := commonjwt.CustomClaims{
+		UserID:   fmt.Sprintf("%d", user.ID),
+		Role:     user.Role,
+		Username: user.Username,
+	}
+
+	tokenPair, err := l.svcCtx.JWTMgr.GenerateTokenPair(claims)
+	if err != nil {
+		return nil, fmt.Errorf("failed to generate token: %w", err)
+	}
+
+	if err := l.svcCtx.TokenDAO.SaveAccessToken(l.ctx, user.ID, tokenPair.AccessToken, l.svcCtx.Config.JWT.AccessExpire); err != nil {
+		return nil, fmt.Errorf("failed to save access token: %w", err)
+	}
+	if err := l.svcCtx.TokenDAO.SaveRefreshToken(l.ctx, user.ID, tokenPair.RefreshToken, l.svcCtx.Config.JWT.RefreshExpire); err != nil {
+		return nil, fmt.Errorf("failed to save refresh token: %w", err)
+	}
+
 	resp := &types.CallbackResp{
 		Base: types.BaseResp{
 			Code:      0,
 			Message:   "success",
 			Timestamp: time.Now().Unix(),
 		},
-		UserInfo: *userInfo,
+		UserInfo:     *userInfo,
+		AccessToken:  tokenPair.AccessToken,
+		RefreshToken: tokenPair.RefreshToken,
 	}
 
 	return resp, nil
@@ -244,19 +288,6 @@ func (l *CallbackLogic) getUserInfo(accessToken string, refreshToken string) (*t
 		AvatarUrl:  userInfoResp.Data.AvatarUrl,
 		TenantName: userInfoResp.Data.TenantKey,
 	}
-
-	fmt.Printf("=== Feishu User Info ===\n")
-	fmt.Printf("Open ID: %s\n", userInfo.OpenId)
-	fmt.Printf("Union ID: %s\n", userInfo.UnionId)
-	fmt.Printf("Name: %s\n", userInfo.Name)
-	fmt.Printf("English Name: %s\n", userInfo.EnName)
-	fmt.Printf("Email: %s\n", userInfo.Email)
-	fmt.Printf("Mobile: %s\n", userInfo.Mobile)
-	fmt.Printf("Avatar URL: %s\n", userInfo.AvatarUrl)
-	fmt.Printf("Tenant Key: %s\n", userInfo.TenantName)
-	fmt.Printf("Access Token: %s\n", accessToken)
-	fmt.Printf("Refresh Token: %s\n", refreshToken)
-	fmt.Printf("========================\n")
 
 	return userInfo, nil
 }
