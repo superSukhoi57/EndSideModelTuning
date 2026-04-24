@@ -1,9 +1,13 @@
 import React, { useEffect, useState, useRef } from 'react';
 import './Login.css';
+import { config } from '../stores/config.ts';
 
 const FEISHU_APP_ID = 'cli_a960a3aa0db89bd5';
-const REDIRECT_URI = 'http://47.115.225.81:12300/callback';
-const API_BASE_URL = 'http://47.115.225.81:12300';
+const REDIRECT_URI = `${config.auth}/callback`;
+
+//const REDIRECT_URI = 'http://47.115.225.81:12300/callback';
+console.log('REDIRECT_URI:', REDIRECT_URI);
+
 
 declare global {
     interface Window {
@@ -62,7 +66,7 @@ const Login: React.FC = () => {
 
     const fetchState = async (): Promise<string> => {
         try {
-            const response = await fetch(`${API_BASE_URL}/state`);
+            const response = await fetch(`${config.auth}/state`);
             if (!response.ok) throw new Error('Failed to fetch state');
             const data = await response.json();
             return data.state;
