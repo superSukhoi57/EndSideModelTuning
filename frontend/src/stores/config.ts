@@ -1,6 +1,9 @@
 interface AppConfig {
     auth: string;
-    interaction: string;
+    machine: string;
+    paramater: string;
+    tasks: string;
+    result: string;
     loginTimeoutSec: number;
 }
 
@@ -17,7 +20,6 @@ async function loadConfig() {
     }
 }
 
-//等待配置加载完成
 await loadConfig();
 
 export { config };

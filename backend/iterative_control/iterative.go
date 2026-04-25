@@ -32,7 +32,8 @@ func main() {
 	//打印配置信息
 	fmt.Printf("Config: %#v\n", c)
 
-	server := rest.MustNewServer(c.RestConf)
+	//server := rest.MustNewServer(c.RestConf) //不开启跨域
+	server := rest.MustNewServer(c.RestConf, rest.WithCors("*"))
 	defer server.Stop()
 
 	ctx := svc.NewServiceContext(c)
