@@ -81,6 +81,31 @@
     color: white !important;
 }
 
+.sidebar .ant-menu-submenu {
+    color: rgba(255, 255, 255, 0.7) !important;
+}
+
+.sidebar .ant-menu-submenu-title {
+    color: rgba(255, 255, 255, 0.7) !important;
+    margin: 4px 10px !important;
+    border-radius: 8px !important;
+}
+
+.sidebar .ant-menu-submenu-title:hover {
+    background: rgba(255, 255, 255, 0.1) !important;
+    color: white !important;
+}
+
+.sidebar .ant-menu-submenu-selected>.ant-menu-submenu-title {
+    color: rgba(255, 255, 255, 0.7) !important;
+    background: transparent !important;
+}
+
+.sidebar .ant-menu-submenu-open>.ant-menu-submenu-title {
+    color: white !important;
+    background: transparent !important;
+}
+
 .sidebar .ant-menu-item .anticon {
     font-size: 18px;
 }

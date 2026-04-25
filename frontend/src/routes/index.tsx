@@ -4,7 +4,7 @@ import Login from '../pages/Login.tsx';
 import Callback from '../pages/Callback.tsx';
 import MainLayout from '../layouts/MainLayout.tsx';
 import DeviceManagement from '../pages/DeviceManagement.tsx';
-import TaskManagement from '../pages/TaskManagement.tsx';
+import TaskManagement from '../pages/TaskManagement/TaskManagement.tsx';
 import CreateTask from '../pages/TaskManagement/CreateTask.tsx';
 import TaskList from '../pages/TaskManagement/TaskList.tsx';
 import UserInfo from '../pages/UserInfo.tsx';
