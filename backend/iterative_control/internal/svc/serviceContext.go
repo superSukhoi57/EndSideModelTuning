@@ -1,22 +1,66 @@
-// Code scaffolded by goctl. Safe to edit.
-// goctl 1.9.2
-
 package svc
 
 import (
+	"fmt"
+
 	"backend/common/llm"
 	"iterative_control/internal/config"
+	"iterative_control/internal/dao/machine"
+	"iterative_control/internal/dao/parameter"
+	"iterative_control/internal/dao/result"
+	"iterative_control/internal/dao/task"
+
+	"gorm.io/driver/mysql"
+	"gorm.io/gorm"
+	"gorm.io/gorm/schema"
+
+	"github.com/redis/go-redis/v9"
 )
 
 type ServiceContext struct {
-	Config   config.Config
-	BLClient *llm.BLClient
+	Config       config.Config
+	Rdb          *redis.Client
+	DB           *gorm.DB
+	BLClient     *llm.BLClient
+	MachineDAO   *machine.MachineDAO
+	ParameterDAO *parameter.ParameterDAO
+	TaskDAO      *task.TaskDAO
+	ResultDAO    *result.ResultDAO
 }
 
 func NewServiceContext(c config.Config) *ServiceContext {
+	rdb := redis.NewClient(&redis.Options{
+		Addr:     c.Redis.Host,
+		Password: c.Redis.Pass,
+		DB:       c.Redis.DB,
+	})
+
+	dsn := fmt.Sprintf("%s:%s@tcp(%s:%d)/%s?charset=%s&parseTime=True&loc=Local",
+		c.MySQL.User,
+		c.MySQL.Pass,
+		c.MySQL.Host,
+		c.MySQL.Port,
+		c.MySQL.DB,
+		c.MySQL.Charset,
+	)
+
+	db, err := gorm.Open(mysql.Open(dsn), &gorm.Config{
+		NamingStrategy: schema.NamingStrategy{
+			SingularTable: true,
+		},
+	})
+	if err != nil {
+		panic(fmt.Sprintf("failed to connect database: %v", err))
+	}
 
 	return &ServiceContext{
-		Config:   c,
-		BLClient: llm.CreateLLMClient(c.LLM.APIKey, c.LLM.Model),
+		Config:       c,
+		Rdb:          rdb,
+		DB:           db,
+		BLClient:     llm.CreateLLMClient(c.LLM.APIKey, c.LLM.Model),
+		MachineDAO:   machine.NewMachineDAO(db),
+		ParameterDAO: parameter.NewParameterDAO(db),
+		TaskDAO:      task.NewTaskDAO(db),
+		ResultDAO:    result.NewResultDAO(db),
 	}
 }

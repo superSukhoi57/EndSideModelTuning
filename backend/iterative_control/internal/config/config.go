@@ -1,14 +1,29 @@
-// Code scaffolded by goctl. Safe to edit.
-// goctl 1.9.2
-
 package config
 
 import "github.com/zeromicro/go-zero/rest"
 
 type Config struct {
 	rest.RestConf
-	LLM LLMCfg
+	Redis RedisConf
+	MySQL MySQLConf
+	LLM   LLMCfg
 }
+
+type RedisConf struct {
+	Host string
+	Pass string
+	DB   int
+}
+
+type MySQLConf struct {
+	Host    string
+	Port    int
+	User    string
+	Pass    string
+	DB      string
+	Charset string
+}
+
 type LLMCfg struct {
 	APIKey string
 	Model  string
