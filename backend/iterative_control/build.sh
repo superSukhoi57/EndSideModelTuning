@@ -1,10 +1,11 @@
 #!/bin/bash
+
 set -e
 
 VERSION_FILE="$(dirname "$0")/version.txt"
 MAX_VERSION_RECORDS=88
 
-echo "=== Building frontend service ==="
+echo "=== Building iterative control service ==="
 
 # 读取当前版本号
 if [ -f "$VERSION_FILE" ] && [ -s "$VERSION_FILE" ]; then
@@ -50,29 +51,18 @@ NEW_VERSION="${X1}.${X2}.${X3}"
 echo "新版本: $NEW_VERSION"
 echo ""
 
-# 安装依赖并构建前端资源
-echo "Installing dependencies..."
-npm install
-
-echo "Building frontend..."
-npm run build
-
-echo "Build completed successfully!"
-echo "Output directory: build/"
-echo ""
-
 # 构建Docker镜像
-echo "Building Docker image: frontend:$NEW_VERSION ..."
-docker build -t "frontend:$NEW_VERSION" .
+echo "Building Docker image: iterative:$NEW_VERSION ..."
+docker build -t "iterative:$NEW_VERSION" .
 
 echo "=== Docker image built successfully ==="
 
 # 推送镜像到远程仓库
-REMOTE_REGISTRY="47.115.225.81:30443/edgemodimp/frontend"
+REMOTE_REGISTRY="47.115.225.81:30443/edgemodimp/iterative"
 REMOTE_IMAGE="${REMOTE_REGISTRY}:${NEW_VERSION}"
 
 echo "推送镜像到远程仓库: $REMOTE_IMAGE ..."
-docker tag "frontend:${NEW_VERSION}" "$REMOTE_IMAGE"
+docker tag "iterative:${NEW_VERSION}" "$REMOTE_IMAGE"
 docker push "$REMOTE_IMAGE"
 echo "镜像推送成功"
 
@@ -80,7 +70,7 @@ echo "镜像推送成功"
 echo "清理远程仓库标签引用..."
 docker rmi "$REMOTE_IMAGE"
 echo "已删除标签引用: $REMOTE_IMAGE"
-echo "保留本地标签: frontend:${NEW_VERSION}"
+echo "保留本地标签: iterative:${NEW_VERSION}"
 
 # 构建成功后，更新版本记录
 echo "更新版本记录..."

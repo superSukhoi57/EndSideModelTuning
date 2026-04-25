@@ -43,3 +43,11 @@ npm start
 - 模型微调
 - 迭代控制
 - 结果验证
+
+
+
+先登录镜像仓库
+```bash
+docker login your.docker.registry.com
+```
+然后输入你的用户名和密码
