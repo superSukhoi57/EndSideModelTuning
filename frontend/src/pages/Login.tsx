@@ -1,6 +1,8 @@
 import React, { useEffect, useState, useRef } from 'react';
+import { useNavigate } from 'react-router-dom';
 import './Login.css';
 import { config } from '../stores/config.ts';
+import { authStore } from '../stores/auth.ts';
 
 const FEISHU_APP_ID = 'cli_a960a3aa0db89bd5';
 const REDIRECT_URI = `${config.auth}/callback`;
@@ -22,11 +24,17 @@ const Login: React.FC = () => {
     const [showExpiredModal, setShowExpiredModal] = useState(false);
     const qrLoginObjRef = useRef<any>(null);
     const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+    const navigate = useNavigate();
 
     // 修复：使用锁，确保整个生命周期只初始化一次
     const initializedRef = useRef(false);
 
     useEffect(() => {
+        if (authStore.isAuthenticated()) {
+            navigate('/');
+            return;
+        }
+
         // 严格模式下也强制只执行一次
         if (initializedRef.current) return;
         initializedRef.current = true;

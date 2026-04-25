@@ -1,13 +1,9 @@
 import React from 'react';
-import Login from './pages/Login.tsx';
+import AppRoutes from './routes/index.tsx';
 import './App.css';
 
 function App() {
-  return (
-    <div className="App">
-      <Login />
-    </div>
-  );
+  return <AppRoutes />;
 }
 
 export default App;
