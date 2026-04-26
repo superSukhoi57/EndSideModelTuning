@@ -52,3 +52,14 @@ docker login your.docker.registry.com
 ```
 然后输入你的用户名和密码
 地址管理在build-config.json文件中
+
+
+对于dockerfile里面的FROM指令，需要根据实际情况修改为你的镜像仓库地址
+例如：
+```
+FROM golang:1.19-alpine
+```
+我这边是去dockerhub（https://hub.docker.com/）拉下来然后重命名的
+如果你有网络问题可以使用https://1ms.run/r/library/nginx/tags?tag=alpine&sort_by=full_size
+
+

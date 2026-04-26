@@ -1,10 +1,10 @@
-FROM golang:alpine AS builder
+FROM golang:1.25.9-alpine3.22 AS builder
 
 WORKDIR /build
 COPY . .
 RUN CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -o auth .
 
-FROM alpine:latest
+FROM alpine:3.22
 
 WORKDIR /work
 
