@@ -22,7 +22,7 @@ IFS='.' read -r X1 X2 X3 <<< "$CURRENT_VERSION"
 
 # 提示用户选择递增位置
 echo ""
-echo "请选择版本号递增位置:"
+echo "请选择版本号递增位置:vX1.X2.X3"
 echo "  1 - x1 主版本（模块重构或大变更）"
 echo "  2 - x2 次要版本（功能迭代）"
 echo "  3 - x3 补丁版本（小改动、bug修复）"
