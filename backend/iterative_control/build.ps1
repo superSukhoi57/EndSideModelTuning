@@ -1,8 +1,11 @@
+﻿chcp 65001 > $null
+
 $ErrorActionPreference = "Stop"
 
 $ScriptDir = Split-Path -Parent $MyInvocation.MyCommand.Definition
 $VERSION_FILE = Join-Path $ScriptDir "version.txt"
 $MAX_VERSION_RECORDS = 88
+$CONFIG_FILE = Join-Path $ScriptDir "../../build-config.json" | Resolve-Path
 
 Write-Host "=== Building iterative control service ==="
 
@@ -52,7 +55,9 @@ docker build -t "iterative:$NEW_VERSION" .
 
 Write-Host "=== Docker image built successfully ==="
 
-$REMOTE_REGISTRY = "47.115.225.81:30443/edgemodimp/iterative"
+$ConfigContent = Get-Content $CONFIG_FILE -Raw | ConvertFrom-Json
+$REGISTRY_BASE = $ConfigContent.remote_registry
+$REMOTE_REGISTRY = "${REGISTRY_BASE}/iterative"
 $REMOTE_IMAGE = "${REMOTE_REGISTRY}:${NEW_VERSION}"
 
 Write-Host "推送镜像到远程仓库: $REMOTE_IMAGE ..."

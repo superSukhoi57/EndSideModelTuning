@@ -51,3 +51,4 @@ npm start
 docker login your.docker.registry.com
 ```
 然后输入你的用户名和密码
+地址管理在build-config.json文件中

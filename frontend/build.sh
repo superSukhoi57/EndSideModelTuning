@@ -3,6 +3,7 @@ set -e
 
 VERSION_FILE="$(dirname "$0")/version.txt"
 MAX_VERSION_RECORDS=88
+CONFIG_FILE="$(dirname "$0")/../build-config.json"
 
 echo "=== Building frontend service ==="
 
@@ -52,7 +53,7 @@ echo ""
 
 # 安装依赖并构建前端资源
 echo "Installing dependencies..."
-npm install
+npm install --legacy-peer-deps
 
 echo "Building frontend..."
 npm run build
@@ -67,8 +68,9 @@ docker build -t "frontend:$NEW_VERSION" .
 
 echo "=== Docker image built successfully ==="
 
-# 推送镜像到远程仓库
-REMOTE_REGISTRY="47.115.225.81:30443/edgemodimp/frontend"
+# 推送镜像到远程仓库（从配置文件读取）
+REGISTRY_BASE=$(python3 -c "import json; print(json.load(open('$CONFIG_FILE'))['remote_registry'])" 2>/dev/null || python -c "import json; print(json.load(open('$CONFIG_FILE'))['remote_registry'])")
+REMOTE_REGISTRY="${REGISTRY_BASE}/frontend"
 REMOTE_IMAGE="${REMOTE_REGISTRY}:${NEW_VERSION}"
 
 echo "推送镜像到远程仓库: $REMOTE_IMAGE ..."

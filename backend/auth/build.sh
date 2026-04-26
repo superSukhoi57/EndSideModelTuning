@@ -4,6 +4,7 @@ set -e
 
 VERSION_FILE="$(dirname "$0")/version.txt"
 MAX_VERSION_RECORDS=88
+CONFIG_FILE="$(dirname "$0")/../../build-config.json"
 
 echo "=== Building auth service ==="
 
@@ -57,8 +58,9 @@ docker build -t "auth:$NEW_VERSION" .
 
 echo "=== Docker image built successfully ==="
 
-# 推送镜像到远程仓库
-REMOTE_REGISTRY="47.115.225.81:30443/edgemodimp/auth"
+# 推送镜像到远程仓库（从配置文件读取）
+REGISTRY_BASE=$(python3 -c "import json; print(json.load(open('$CONFIG_FILE'))['remote_registry'])" 2>/dev/null || python -c "import json; print(json.load(open('$CONFIG_FILE'))['remote_registry'])")
+REMOTE_REGISTRY="${REGISTRY_BASE}/auth"
 REMOTE_IMAGE="${REMOTE_REGISTRY}:${NEW_VERSION}"
 
 echo "推送镜像到远程仓库: $REMOTE_IMAGE ..."
