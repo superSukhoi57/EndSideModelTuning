@@ -54,7 +54,7 @@ echo ""
 
 # 构建Docker镜像
 echo "Building Docker image: auth:$NEW_VERSION ..."
-docker build -t "auth:$NEW_VERSION" .
+docker build -t "auth:$NEW_VERSION" -f Dockerfile ..
 
 echo "=== Docker image built successfully ==="
 

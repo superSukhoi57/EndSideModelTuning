@@ -1,4 +1,4 @@
-﻿chcp 65001 > $null
+chcp 65001 > $null
 
 $ErrorActionPreference = "Stop"
 
@@ -51,7 +51,7 @@ Write-Host "新版本: $NEW_VERSION"
 Write-Host ""
 
 Write-Host "Building Docker image: iterative:$NEW_VERSION ..."
-docker build -t "iterative:$NEW_VERSION" .
+docker build -t "iterative:$NEW_VERSION" -f Dockerfile ..
 
 Write-Host "=== Docker image built successfully ==="
 

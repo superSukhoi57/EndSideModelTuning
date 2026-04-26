@@ -51,7 +51,7 @@ Write-Host "新版本: $NEW_VERSION"
 Write-Host ""
 
 Write-Host "Building Docker image: auth:$NEW_VERSION ..."
-docker build -t "auth:$NEW_VERSION" .
+docker build -t "auth:$NEW_VERSION" -f Dockerfile ..
 
 Write-Host "=== Docker image built successfully ==="
 

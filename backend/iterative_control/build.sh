@@ -54,7 +54,7 @@ echo ""
 
 # 构建Docker镜像
 echo "Building Docker image: iterative:$NEW_VERSION ..."
-docker build -t "iterative:$NEW_VERSION" .
+docker build -t "iterative:$NEW_VERSION" -f Dockerfile ..
 
 echo "=== Docker image built successfully ==="
 
