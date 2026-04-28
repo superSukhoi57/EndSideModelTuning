@@ -18,7 +18,6 @@ type QuestionReq struct {
 type MachineCreateReq struct {
 	IP     string `json:"ip"`
 	Pwd    string `json:"pwd,omitempty"`
-	UserID int64  `json:"userid"`
 	Core   *int   `json:"core,omitempty"`
 	RAM    *int   `json:"ram,omitempty"`
 	Memory *int   `json:"memory,omitempty"`
@@ -43,7 +42,6 @@ type MachineListReq struct {
 	Page     int    `form:"page,default=1"`
 	PageSize int    `form:"pageSize,default=10"`
 	IP       string `form:"ip,optional"`
-	UserID   int64  `form:"userid,optional"`
 	IsFinsh  *int8  `form:"isfinsh,optional"`
 }
 
@@ -69,7 +67,6 @@ type PageResp struct {
 
 type ParameterCreateReq struct {
 	ID         int64  `json:"id"`
-	UserID     int64  `json:"userid"`
 	Parameters string `json:"parameters,omitempty"`
 	Script     string `json:"script"`
 	Desc       string `json:"desc,omitempty"`
@@ -85,7 +82,6 @@ type ParameterUpdateReq struct {
 type ParameterListReq struct {
 	Page     int    `form:"page,default=1"`
 	PageSize int    `form:"pageSize,default=10"`
-	UserID   int64  `form:"userid,optional"`
 	Desc     string `form:"desc,optional"`
 }
 
@@ -102,7 +98,6 @@ type ParameterResp struct {
 type TaskCreateReq struct {
 	ID          int64  `json:"id"`
 	ParameterID int64  `json:"paramterid"`
-	UserID      int64  `json:"userid"`
 	Desc        string `json:"desc,omitempty"`
 }
 
@@ -114,7 +109,6 @@ type TaskUpdateReq struct {
 type TaskListReq struct {
 	Page        int    `form:"page,default=1"`
 	PageSize    int    `form:"pageSize,default=10"`
-	UserID      int64  `form:"userid,optional"`
 	ParameterID int64  `form:"paramterid,optional"`
 	Desc        string `form:"desc,optional"`
 }
@@ -130,7 +124,6 @@ type TaskResp struct {
 
 type ResultCreateReq struct {
 	Result    string `json:"result"`
-	UserID    int64  `json:"userid"`
 	MachineID int64  `json:"machineid"`
 	Desc      string `json:"desc,omitempty"`
 }

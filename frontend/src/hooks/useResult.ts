@@ -11,7 +11,7 @@ interface UseResultReturn {
     updateResult: (data: ResultUpdateReq) => Promise<void>;
     deleteResult: (id: number) => Promise<void>;
     getResultById: (id: number) => Promise<void>;
-    listResults: (params: { page: number; pageSize: number; userid?: number; machineid?: number; desc?: string }) => Promise<void>;
+    listResults: (params: { page: number; pageSize: number; machineid?: number; desc?: string }) => Promise<void>;
 }
 
 export const useResult = (): UseResultReturn => {
@@ -73,7 +73,7 @@ export const useResult = (): UseResultReturn => {
         }
     }, []);
 
-    const listResults = useCallback(async (params: { page: number; pageSize: number; userid?: number; machineid?: number; desc?: string }) => {
+    const listResults = useCallback(async (params: { page: number; pageSize: number; machineid?: number; desc?: string }) => {
         setLoading(true);
         setError(null);
         try {

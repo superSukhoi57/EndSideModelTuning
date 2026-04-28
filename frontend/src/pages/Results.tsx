@@ -68,12 +68,6 @@ const Results: React.FC = () => {
             width: 80,
         },
         {
-            title: '用户ID',
-            dataIndex: 'userid',
-            key: 'userid',
-            width: 100,
-        },
-        {
             title: '机器ID',
             dataIndex: 'machineid',
             key: 'machineid',
@@ -158,9 +152,6 @@ const Results: React.FC = () => {
                 width={700}
             >
                 <Form form={form} layout="vertical">
-                    <Form.Item name="userid" label="用户ID" rules={[{ required: true, message: '请输入用户ID' }]}>
-                        <InputNumber style={{ width: '100%' }} />
-                    </Form.Item>
                     <Form.Item name="machineid" label="机器ID" rules={[{ required: true, message: '请输入机器ID' }]}>
                         <InputNumber style={{ width: '100%' }} />
                     </Form.Item>

@@ -68,12 +68,6 @@ const ParamScriptManagement: React.FC = () => {
             width: 80,
         },
         {
-            title: '用户ID',
-            dataIndex: 'userid',
-            key: 'userid',
-            width: 100,
-        },
-        {
             title: '参数配置',
             dataIndex: 'parameters',
             key: 'parameters',
@@ -159,9 +153,6 @@ const ParamScriptManagement: React.FC = () => {
             >
                 <Form form={form} layout="vertical">
                     <Form.Item name="id" label="ID" rules={[{ required: true, message: '请输入ID' }]}>
-                        <InputNumber style={{ width: '100%' }} disabled={!!editingParam} />
-                    </Form.Item>
-                    <Form.Item name="userid" label="用户ID" rules={[{ required: true, message: '请输入用户ID' }]}>
                         <InputNumber style={{ width: '100%' }} disabled={!!editingParam} />
                     </Form.Item>
                     <Form.Item name="parameters" label="参数配置(JSON)">

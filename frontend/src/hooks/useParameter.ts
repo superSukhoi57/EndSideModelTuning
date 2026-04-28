@@ -11,7 +11,7 @@ interface UseParameterReturn {
     updateParameter: (data: ParameterUpdateReq) => Promise<void>;
     deleteParameter: (id: number) => Promise<void>;
     getParameterById: (id: number) => Promise<void>;
-    listParameters: (params: { page: number; pageSize: number; userid?: number; desc?: string }) => Promise<void>;
+    listParameters: (params: { page: number; pageSize: number; desc?: string }) => Promise<void>;
 }
 
 export const useParameter = (): UseParameterReturn => {
@@ -73,7 +73,7 @@ export const useParameter = (): UseParameterReturn => {
         }
     }, []);
 
-    const listParameters = useCallback(async (params: { page: number; pageSize: number; userid?: number; desc?: string }) => {
+    const listParameters = useCallback(async (params: { page: number; pageSize: number; desc?: string }) => {
         setLoading(true);
         setError(null);
         try {

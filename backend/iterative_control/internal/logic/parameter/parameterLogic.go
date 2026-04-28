@@ -3,7 +3,9 @@ package parameter
 import (
 	"context"
 	"fmt"
+	"log"
 
+	"backend/common/enumeration"
 	"iterative_control/internal/model"
 	"iterative_control/internal/svc"
 	"iterative_control/internal/types"
@@ -22,9 +24,15 @@ func NewParameterLogic(ctx context.Context, svcCtx *svc.ServiceContext) *Paramet
 }
 
 func (l *ParameterLogic) Create(req *types.ParameterCreateReq) error {
+	userID, ok := l.ctx.Value(enumeration.UserIDKey).(int64)
+	if !ok {
+		return fmt.Errorf("missing user id in context")
+	}
+	log.Printf("Create parameter - UserID: %d", userID)
+
 	param := &model.Parameter{
 		ID:         req.ID,
-		UserID:     req.UserID,
+		UserID:     userID,
 		Parameters: req.Parameters,
 		Script:     req.Script,
 		Desc:       req.Desc,
@@ -38,12 +46,21 @@ func (l *ParameterLogic) Create(req *types.ParameterCreateReq) error {
 }
 
 func (l *ParameterLogic) Update(req *types.ParameterUpdateReq) error {
+	userID, ok := l.ctx.Value(enumeration.UserIDKey).(int64)
+	if !ok {
+		return fmt.Errorf("missing user id in context")
+	}
+	log.Printf("Update parameter - UserID: %d, ParameterID: %d", userID, req.ID)
+
 	existing, err := l.svcCtx.ParameterDAO.FindByID(l.ctx, req.ID)
 	if err != nil {
 		return fmt.Errorf("find parameter failed: %w", err)
 	}
 	if existing == nil {
 		return fmt.Errorf("parameter not found")
+	}
+	if existing.UserID != userID {
+		return fmt.Errorf("parameter not owned by current user")
 	}
 
 	updates := &model.Parameter{ID: req.ID}
@@ -65,12 +82,21 @@ func (l *ParameterLogic) Update(req *types.ParameterUpdateReq) error {
 }
 
 func (l *ParameterLogic) Delete(id int64) error {
+	userID, ok := l.ctx.Value(enumeration.UserIDKey).(int64)
+	if !ok {
+		return fmt.Errorf("missing user id in context")
+	}
+	log.Printf("Delete parameter - UserID: %d, ParameterID: %d", userID, id)
+
 	existing, err := l.svcCtx.ParameterDAO.FindByID(l.ctx, id)
 	if err != nil {
 		return fmt.Errorf("find parameter failed: %w", err)
 	}
 	if existing == nil {
 		return fmt.Errorf("parameter not found")
+	}
+	if existing.UserID != userID {
+		return fmt.Errorf("parameter not owned by current user")
 	}
 
 	if err := l.svcCtx.ParameterDAO.Delete(l.ctx, id); err != nil {
@@ -81,12 +107,21 @@ func (l *ParameterLogic) Delete(id int64) error {
 }
 
 func (l *ParameterLogic) GetByID(id int64) (*types.ParameterResp, error) {
+	userID, ok := l.ctx.Value(enumeration.UserIDKey).(int64)
+	if !ok {
+		return nil, fmt.Errorf("missing user id in context")
+	}
+	log.Printf("Get parameter by ID - UserID: %d, ParameterID: %d", userID, id)
+
 	param, err := l.svcCtx.ParameterDAO.FindByID(l.ctx, id)
 	if err != nil {
 		return nil, fmt.Errorf("find parameter failed: %w", err)
 	}
 	if param == nil {
 		return nil, fmt.Errorf("parameter not found")
+	}
+	if param.UserID != userID {
+		return nil, fmt.Errorf("parameter not owned by current user")
 	}
 
 	return &types.ParameterResp{
@@ -101,7 +136,13 @@ func (l *ParameterLogic) GetByID(id int64) (*types.ParameterResp, error) {
 }
 
 func (l *ParameterLogic) List(req *types.ParameterListReq) (*types.PageResp, error) {
-	result, err := l.svcCtx.ParameterDAO.List(l.ctx, req.Page, req.PageSize, req.UserID, req.Desc)
+	userID, ok := l.ctx.Value(enumeration.UserIDKey).(int64)
+	if !ok {
+		return nil, fmt.Errorf("missing user id in context")
+	}
+	log.Printf("List parameters - UserID: %d", userID)
+
+	result, err := l.svcCtx.ParameterDAO.List(l.ctx, req.Page, req.PageSize, userID, req.Desc)
 	if err != nil {
 		return nil, fmt.Errorf("list parameters failed: %w", err)
 	}

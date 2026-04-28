@@ -3,7 +3,9 @@ package machine
 import (
 	"context"
 	"fmt"
+	"log"
 
+	"backend/common/enumeration"
 	"iterative_control/internal/model"
 	"iterative_control/internal/svc"
 	"iterative_control/internal/types"
@@ -22,10 +24,16 @@ func NewMachineLogic(ctx context.Context, svcCtx *svc.ServiceContext) *MachineLo
 }
 
 func (l *MachineLogic) Create(req *types.MachineCreateReq) error {
+	userID, ok := l.ctx.Value(enumeration.UserIDKey).(int64)
+	if !ok {
+		return fmt.Errorf("missing user id in context")
+	}
+	log.Printf("Create machine - UserID: %d", userID)
+
 	machine := &model.Machine{
 		IP:     req.IP,
 		Pwd:    req.Pwd,
-		UserID: req.UserID,
+		UserID: userID,
 		Core:   req.Core,
 		RAM:    req.RAM,
 		Memory: req.Memory,
@@ -41,12 +49,21 @@ func (l *MachineLogic) Create(req *types.MachineCreateReq) error {
 }
 
 func (l *MachineLogic) Update(req *types.MachineUpdateReq) error {
+	userID, ok := l.ctx.Value(enumeration.UserIDKey).(int64)
+	if !ok {
+		return fmt.Errorf("missing user id in context")
+	}
+	log.Printf("Update machine - UserID: %d, MachineID: %d", userID, req.ID)
+
 	existing, err := l.svcCtx.MachineDAO.FindByID(l.ctx, req.ID)
 	if err != nil {
 		return fmt.Errorf("find machine failed: %w", err)
 	}
 	if existing == nil {
 		return fmt.Errorf("machine not found")
+	}
+	if existing.UserID != userID {
+		return fmt.Errorf("machine not owned by current user")
 	}
 
 	updates := &model.Machine{ID: req.ID}
@@ -86,12 +103,21 @@ func (l *MachineLogic) Update(req *types.MachineUpdateReq) error {
 }
 
 func (l *MachineLogic) Delete(id int64) error {
+	userID, ok := l.ctx.Value(enumeration.UserIDKey).(int64)
+	if !ok {
+		return fmt.Errorf("missing user id in context")
+	}
+	log.Printf("Delete machine - UserID: %d, MachineID: %d", userID, id)
+
 	existing, err := l.svcCtx.MachineDAO.FindByID(l.ctx, id)
 	if err != nil {
 		return fmt.Errorf("find machine failed: %w", err)
 	}
 	if existing == nil {
 		return fmt.Errorf("machine not found")
+	}
+	if existing.UserID != userID {
+		return fmt.Errorf("machine not owned by current user")
 	}
 
 	if err := l.svcCtx.MachineDAO.Delete(l.ctx, id); err != nil {
@@ -102,12 +128,21 @@ func (l *MachineLogic) Delete(id int64) error {
 }
 
 func (l *MachineLogic) GetByID(id int64) (*types.MachineResp, error) {
+	userID, ok := l.ctx.Value(enumeration.UserIDKey).(int64)
+	if !ok {
+		return nil, fmt.Errorf("missing user id in context")
+	}
+	log.Printf("Get machine by ID - UserID: %d, MachineID: %d", userID, id)
+
 	machine, err := l.svcCtx.MachineDAO.FindByID(l.ctx, id)
 	if err != nil {
 		return nil, fmt.Errorf("find machine failed: %w", err)
 	}
 	if machine == nil {
 		return nil, fmt.Errorf("machine not found")
+	}
+	if machine.UserID != userID {
+		return nil, fmt.Errorf("machine not owned by current user")
 	}
 
 	return &types.MachineResp{
@@ -127,7 +162,13 @@ func (l *MachineLogic) GetByID(id int64) (*types.MachineResp, error) {
 }
 
 func (l *MachineLogic) List(req *types.MachineListReq) (*types.PageResp, error) {
-	result, err := l.svcCtx.MachineDAO.List(l.ctx, req.Page, req.PageSize, req.IP, req.UserID, req.IsFinsh)
+	userID, ok := l.ctx.Value(enumeration.UserIDKey).(int64)
+	if !ok {
+		return nil, fmt.Errorf("missing user id in context")
+	}
+	log.Printf("List machines - UserID: %d", userID)
+
+	result, err := l.svcCtx.MachineDAO.List(l.ctx, req.Page, req.PageSize, req.IP, userID, req.IsFinsh)
 	if err != nil {
 		return nil, fmt.Errorf("list machines failed: %w", err)
 	}

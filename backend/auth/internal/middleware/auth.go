@@ -7,6 +7,8 @@ import (
 	"net/http"
 	"strconv"
 	"strings"
+
+	"github.com/zeromicro/go-zero/core/logx"
 )
 
 type ContextKey string
@@ -53,6 +55,7 @@ func (m *AuthMiddleware) Handle(next http.HandlerFunc) http.HandlerFunc {
 			http.Error(w, "token revoked", http.StatusUnauthorized)
 			return
 		}
+		logx.Infof("令牌通过校验-----> user_id: %d, role: %s", userID, claims.Role)
 
 		ctx := context.WithValue(r.Context(), enumeration.UserIDKey, userID)
 		ctx = context.WithValue(ctx, enumeration.RoleKey, claims.Role)

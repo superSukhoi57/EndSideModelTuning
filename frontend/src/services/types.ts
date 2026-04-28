@@ -16,7 +16,6 @@ export interface Machine {
 export interface MachineCreateReq {
     ip: string;
     pwd?: string;
-    userid: number;
     core?: number;
     ram?: number;
     memory?: number;
@@ -49,7 +48,6 @@ export interface Parameter {
 
 export interface ParameterCreateReq {
     id: number;
-    userid: number;
     parameters?: string;
     script: string;
     desc?: string;
@@ -74,7 +72,6 @@ export interface Task {
 export interface TaskCreateReq {
     id: number;
     paramterid: number;
-    userid: number;
     desc?: string;
 }
 
@@ -95,7 +92,6 @@ export interface Result {
 
 export interface ResultCreateReq {
     result: string;
-    userid: number;
     machineid: number;
     desc?: string;
 }

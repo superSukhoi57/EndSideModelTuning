@@ -74,12 +74,6 @@ const TaskList: React.FC = () => {
             width: 100,
         },
         {
-            title: '用户ID',
-            dataIndex: 'userid',
-            key: 'userid',
-            width: 100,
-        },
-        {
             title: '描述',
             dataIndex: 'desc',
             key: 'desc',
@@ -161,9 +155,6 @@ const TaskList: React.FC = () => {
                         <InputNumber style={{ width: '100%' }} disabled={!!editingTask} />
                     </Form.Item>
                     <Form.Item name="paramterid" label="参数ID" rules={[{ required: true, message: '请输入参数ID' }]}>
-                        <InputNumber style={{ width: '100%' }} disabled={!!editingTask} />
-                    </Form.Item>
-                    <Form.Item name="userid" label="用户ID" rules={[{ required: true, message: '请输入用户ID' }]}>
                         <InputNumber style={{ width: '100%' }} disabled={!!editingTask} />
                     </Form.Item>
                     <Form.Item name="desc" label="描述">

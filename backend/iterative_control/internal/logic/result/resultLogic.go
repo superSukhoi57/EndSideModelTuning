@@ -3,7 +3,9 @@ package result
 import (
 	"context"
 	"fmt"
+	"log"
 
+	"backend/common/enumeration"
 	"iterative_control/internal/model"
 	"iterative_control/internal/svc"
 	"iterative_control/internal/types"
@@ -22,9 +24,15 @@ func NewResultLogic(ctx context.Context, svcCtx *svc.ServiceContext) *ResultLogi
 }
 
 func (l *ResultLogic) Create(req *types.ResultCreateReq) error {
+	userID, ok := l.ctx.Value(enumeration.UserIDKey).(int64)
+	if !ok {
+		return fmt.Errorf("missing user id in context")
+	}
+	log.Printf("Create result - UserID: %d", userID)
+
 	result := &model.Result{
 		Result:    req.Result,
-		UserID:    req.UserID,
+		UserID:    userID,
 		MachineID: req.MachineID,
 		Desc:      req.Desc,
 	}
@@ -37,12 +45,21 @@ func (l *ResultLogic) Create(req *types.ResultCreateReq) error {
 }
 
 func (l *ResultLogic) Update(req *types.ResultUpdateReq) error {
+	userID, ok := l.ctx.Value(enumeration.UserIDKey).(int64)
+	if !ok {
+		return fmt.Errorf("missing user id in context")
+	}
+	log.Printf("Update result - UserID: %d, ResultID: %d", userID, req.ID)
+
 	existing, err := l.svcCtx.ResultDAO.FindByID(l.ctx, req.ID)
 	if err != nil {
 		return fmt.Errorf("find result failed: %w", err)
 	}
 	if existing == nil {
 		return fmt.Errorf("result not found")
+	}
+	if existing.UserID != userID {
+		return fmt.Errorf("result not owned by current user")
 	}
 
 	updates := &model.Result{ID: req.ID}
@@ -61,12 +78,21 @@ func (l *ResultLogic) Update(req *types.ResultUpdateReq) error {
 }
 
 func (l *ResultLogic) Delete(id int64) error {
+	userID, ok := l.ctx.Value(enumeration.UserIDKey).(int64)
+	if !ok {
+		return fmt.Errorf("missing user id in context")
+	}
+	log.Printf("Delete result - UserID: %d, ResultID: %d", userID, id)
+
 	existing, err := l.svcCtx.ResultDAO.FindByID(l.ctx, id)
 	if err != nil {
 		return fmt.Errorf("find result failed: %w", err)
 	}
 	if existing == nil {
 		return fmt.Errorf("result not found")
+	}
+	if existing.UserID != userID {
+		return fmt.Errorf("result not owned by current user")
 	}
 
 	if err := l.svcCtx.ResultDAO.Delete(l.ctx, id); err != nil {
@@ -77,12 +103,21 @@ func (l *ResultLogic) Delete(id int64) error {
 }
 
 func (l *ResultLogic) GetByID(id int64) (*types.ResultResp, error) {
+	userID, ok := l.ctx.Value(enumeration.UserIDKey).(int64)
+	if !ok {
+		return nil, fmt.Errorf("missing user id in context")
+	}
+	log.Printf("Get result by ID - UserID: %d, ResultID: %d", userID, id)
+
 	result, err := l.svcCtx.ResultDAO.FindByID(l.ctx, id)
 	if err != nil {
 		return nil, fmt.Errorf("find result failed: %w", err)
 	}
 	if result == nil {
 		return nil, fmt.Errorf("result not found")
+	}
+	if result.UserID != userID {
+		return nil, fmt.Errorf("result not owned by current user")
 	}
 
 	return &types.ResultResp{
@@ -97,7 +132,13 @@ func (l *ResultLogic) GetByID(id int64) (*types.ResultResp, error) {
 }
 
 func (l *ResultLogic) List(req *types.ResultListReq) (*types.PageResp, error) {
-	result, err := l.svcCtx.ResultDAO.List(l.ctx, req.Page, req.PageSize, req.UserID, req.MachineID, req.Desc)
+	userID, ok := l.ctx.Value(enumeration.UserIDKey).(int64)
+	if !ok {
+		return nil, fmt.Errorf("missing user id in context")
+	}
+	log.Printf("List results - UserID: %d", userID)
+
+	result, err := l.svcCtx.ResultDAO.List(l.ctx, req.Page, req.PageSize, userID, req.MachineID, req.Desc)
 	if err != nil {
 		return nil, fmt.Errorf("list results failed: %w", err)
 	}

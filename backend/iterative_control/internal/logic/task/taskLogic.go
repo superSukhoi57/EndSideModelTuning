@@ -3,7 +3,9 @@ package task
 import (
 	"context"
 	"fmt"
+	"log"
 
+	"backend/common/enumeration"
 	"iterative_control/internal/model"
 	"iterative_control/internal/svc"
 	"iterative_control/internal/types"
@@ -22,10 +24,16 @@ func NewTaskLogic(ctx context.Context, svcCtx *svc.ServiceContext) *TaskLogic {
 }
 
 func (l *TaskLogic) Create(req *types.TaskCreateReq) error {
+	userID, ok := l.ctx.Value(enumeration.UserIDKey).(int64)
+	if !ok {
+		return fmt.Errorf("missing user id in context")
+	}
+	log.Printf("Create task - UserID: %d", userID)
+
 	task := &model.Task{
 		ID:          req.ID,
 		ParameterID: req.ParameterID,
-		UserID:      req.UserID,
+		UserID:      userID,
 		Desc:        req.Desc,
 	}
 
@@ -37,12 +45,21 @@ func (l *TaskLogic) Create(req *types.TaskCreateReq) error {
 }
 
 func (l *TaskLogic) Update(req *types.TaskUpdateReq) error {
+	userID, ok := l.ctx.Value(enumeration.UserIDKey).(int64)
+	if !ok {
+		return fmt.Errorf("missing user id in context")
+	}
+	log.Printf("Update task - UserID: %d, TaskID: %d", userID, req.ID)
+
 	existing, err := l.svcCtx.TaskDAO.FindByID(l.ctx, req.ID)
 	if err != nil {
 		return fmt.Errorf("find task failed: %w", err)
 	}
 	if existing == nil {
 		return fmt.Errorf("task not found")
+	}
+	if existing.UserID != userID {
+		return fmt.Errorf("task not owned by current user")
 	}
 
 	updates := &model.Task{ID: req.ID}
@@ -58,12 +75,21 @@ func (l *TaskLogic) Update(req *types.TaskUpdateReq) error {
 }
 
 func (l *TaskLogic) Delete(id int64) error {
+	userID, ok := l.ctx.Value(enumeration.UserIDKey).(int64)
+	if !ok {
+		return fmt.Errorf("missing user id in context")
+	}
+	log.Printf("Delete task - UserID: %d, TaskID: %d", userID, id)
+
 	existing, err := l.svcCtx.TaskDAO.FindByID(l.ctx, id)
 	if err != nil {
 		return fmt.Errorf("find task failed: %w", err)
 	}
 	if existing == nil {
 		return fmt.Errorf("task not found")
+	}
+	if existing.UserID != userID {
+		return fmt.Errorf("task not owned by current user")
 	}
 
 	if err := l.svcCtx.TaskDAO.Delete(l.ctx, id); err != nil {
@@ -74,12 +100,21 @@ func (l *TaskLogic) Delete(id int64) error {
 }
 
 func (l *TaskLogic) GetByID(id int64) (*types.TaskResp, error) {
+	userID, ok := l.ctx.Value(enumeration.UserIDKey).(int64)
+	if !ok {
+		return nil, fmt.Errorf("missing user id in context")
+	}
+	log.Printf("Get task by ID - UserID: %d, TaskID: %d", userID, id)
+
 	task, err := l.svcCtx.TaskDAO.FindByID(l.ctx, id)
 	if err != nil {
 		return nil, fmt.Errorf("find task failed: %w", err)
 	}
 	if task == nil {
 		return nil, fmt.Errorf("task not found")
+	}
+	if task.UserID != userID {
+		return nil, fmt.Errorf("task not owned by current user")
 	}
 
 	return &types.TaskResp{
@@ -93,7 +128,13 @@ func (l *TaskLogic) GetByID(id int64) (*types.TaskResp, error) {
 }
 
 func (l *TaskLogic) List(req *types.TaskListReq) (*types.PageResp, error) {
-	result, err := l.svcCtx.TaskDAO.List(l.ctx, req.Page, req.PageSize, req.UserID, req.ParameterID, req.Desc)
+	userID, ok := l.ctx.Value(enumeration.UserIDKey).(int64)
+	if !ok {
+		return nil, fmt.Errorf("missing user id in context")
+	}
+	log.Printf("List tasks - UserID: %d", userID)
+
+	result, err := l.svcCtx.TaskDAO.List(l.ctx, req.Page, req.PageSize, userID, req.ParameterID, req.Desc)
 	if err != nil {
 		return nil, fmt.Errorf("list tasks failed: %w", err)
 	}

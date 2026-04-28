@@ -11,7 +11,7 @@ interface UseTaskReturn {
     updateTask: (data: TaskUpdateReq) => Promise<void>;
     deleteTask: (id: number) => Promise<void>;
     getTaskById: (id: number) => Promise<void>;
-    listTasks: (params: { page: number; pageSize: number; userid?: number; paramterid?: number; desc?: string }) => Promise<void>;
+    listTasks: (params: { page: number; pageSize: number; paramterid?: number; desc?: string }) => Promise<void>;
 }
 
 export const useTask = (): UseTaskReturn => {
@@ -73,7 +73,7 @@ export const useTask = (): UseTaskReturn => {
         }
     }, []);
 
-    const listTasks = useCallback(async (params: { page: number; pageSize: number; userid?: number; paramterid?: number; desc?: string }) => {
+    const listTasks = useCallback(async (params: { page: number; pageSize: number; paramterid?: number; desc?: string }) => {
         setLoading(true);
         setError(null);
         try {

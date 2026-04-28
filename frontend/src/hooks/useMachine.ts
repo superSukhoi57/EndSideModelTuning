@@ -11,7 +11,7 @@ interface UseMachineReturn {
     updateMachine: (data: MachineUpdateReq) => Promise<void>;
     deleteMachine: (id: number) => Promise<void>;
     getMachineById: (id: number) => Promise<void>;
-    listMachines: (params: { page: number; pageSize: number; ip?: string; userid?: number; isfinsh?: number }) => Promise<void>;
+    listMachines: (params: { page: number; pageSize: number; ip?: string; isfinsh?: number }) => Promise<void>;
 }
 
 export const useMachine = (): UseMachineReturn => {
@@ -73,7 +73,7 @@ export const useMachine = (): UseMachineReturn => {
         }
     }, []);
 
-    const listMachines = useCallback(async (params: { page: number; pageSize: number; ip?: string; userid?: number; isfinsh?: number }) => {
+    const listMachines = useCallback(async (params: { page: number; pageSize: number; ip?: string; isfinsh?: number }) => {
         setLoading(true);
         setError(null);
         try {

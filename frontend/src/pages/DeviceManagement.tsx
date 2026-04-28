@@ -167,9 +167,6 @@ const DeviceManagement: React.FC = () => {
                     <Form.Item name="pwd" label="密码">
                         <Input.Password />
                     </Form.Item>
-                    <Form.Item name="userid" label="用户ID" rules={[{ required: true, message: '请输入用户ID' }]}>
-                        <InputNumber style={{ width: '100%' }} />
-                    </Form.Item>
                     <Form.Item name="core" label="CPU核心数">
                         <InputNumber style={{ width: '100%' }} />
                     </Form.Item>
