@@ -28,7 +28,7 @@ func callbackHandler(svcCtx *svc.ServiceContext) http.HandlerFunc {
 			return
 		}
 
-		frontendURL := "http://localhost:3000/callback"
+		frontendURL := svcCtx.Config.Frontend.RedirectURI
 		params := url.Values{}
 		params.Set("access_token", resp.AccessToken)
 		params.Set("refresh_token", resp.RefreshToken)

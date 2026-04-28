@@ -21,7 +21,7 @@ const AppRoutes: React.FC = () => {
         <BrowserRouter>
             <Routes>
                 <Route path="/login" element={<Login />} />
-                <Route path="/callback" element={<Callback />} />
+                <Route path="/frontend/callback" element={<Callback />} />
                 <Route
                     path="/"
                     element={

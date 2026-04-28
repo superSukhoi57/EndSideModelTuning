@@ -12,6 +12,7 @@ type Config struct {
 	Redis      RedisConf
 	MySQL      MySQLConf
 	JWT        JWTConf
+	Frontend   FrontendConf
 }
 
 type FeishuAuthCfg struct {
@@ -41,4 +42,8 @@ type JWTConf struct {
 	AccessExpire  time.Duration
 	RefreshExpire time.Duration
 	Issuer        string
+}
+
+type FrontendConf struct {
+	RedirectURI string
 }
