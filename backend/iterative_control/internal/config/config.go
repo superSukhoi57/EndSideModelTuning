@@ -7,6 +7,7 @@ type Config struct {
 	Redis RedisConf
 	MySQL MySQLConf
 	LLM   LLMCfg
+	Auth  AuthConf
 }
 
 type RedisConf struct {
@@ -27,4 +28,8 @@ type MySQLConf struct {
 type LLMCfg struct {
 	APIKey string
 	Model  string
+}
+
+type AuthConf struct {
+	GRPCAddr string
 }

@@ -13,6 +13,11 @@ type Config struct {
 	MySQL      MySQLConf
 	JWT        JWTConf
 	Frontend   FrontendConf
+	GRPC       GRPCConf
+}
+
+type GRPCConf struct {
+	Port int
 }
 
 type FeishuAuthCfg struct {
