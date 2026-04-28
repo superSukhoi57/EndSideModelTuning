@@ -63,7 +63,7 @@ type VerifyTokenResp struct {
 }
 
 type LogoutReq struct {
-	AccessToken string `json:"access_token"`
+	UserID int64 `json:"-"`
 }
 
 type LogoutResp struct {

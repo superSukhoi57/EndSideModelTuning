@@ -1,6 +1,7 @@
 package handler
 
 import (
+	"auth/internal/middleware"
 	"auth/internal/svc"
 	"net/http"
 
@@ -23,12 +24,14 @@ func RegisterHandlers(server *rest.Server, serverCtx *svc.ServiceContext) {
 		},
 	)
 
+	authMiddleware := middleware.NewAuthMiddleware(serverCtx)
+
 	server.AddRoutes(
 		[]rest.Route{
 			{
 				Method:  http.MethodPost,
 				Path:    "/refresh",
-				Handler: refreshTokenHandler(serverCtx),
+				Handler: authMiddleware.Handle(refreshTokenHandler(serverCtx)),
 			},
 			{
 				Method:  http.MethodGet,
@@ -38,7 +41,7 @@ func RegisterHandlers(server *rest.Server, serverCtx *svc.ServiceContext) {
 			{
 				Method:  http.MethodPost,
 				Path:    "/logout",
-				Handler: logoutHandler(serverCtx),
+				Handler: authMiddleware.Handle(logoutHandler(serverCtx)),
 			},
 		},
 		rest.WithPrefix("/auth/token"),

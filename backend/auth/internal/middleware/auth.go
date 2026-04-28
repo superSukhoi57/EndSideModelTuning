@@ -1,13 +1,12 @@
 package middleware
 
 import (
+	"auth/internal/svc"
+	"backend/common/enumeration"
 	"context"
 	"net/http"
+	"strconv"
 	"strings"
-
-	"backend/common/enumeration"
-	"backend/common/protocol/authpb"
-	"iterative_control/internal/svc"
 )
 
 type ContextKey string
@@ -33,16 +32,30 @@ func (m *AuthMiddleware) Handle(next http.HandlerFunc) http.HandlerFunc {
 			token = authHeader
 		}
 
-		resp, err := m.svcCtx.AuthClient.VerifyToken(r.Context(), &authpb.VerifyTokenRequest{
-			AccessToken: token,
-		})
+		claims, err := m.svcCtx.JWTMgr.ValidateToken(token, false)
 		if err != nil {
 			http.Error(w, "invalid token", http.StatusUnauthorized)
 			return
 		}
 
-		ctx := context.WithValue(r.Context(), enumeration.UserIDKey, resp.GetUserId())
-		ctx = context.WithValue(ctx, enumeration.RoleKey, resp.GetRole())
+		userID, err := strconv.ParseInt(claims.UserID, 10, 64)
+		if err != nil {
+			http.Error(w, "invalid token claims", http.StatusUnauthorized)
+			return
+		}
+
+		savedToken, err := m.svcCtx.TokenDAO.GetAccessToken(r.Context(), userID)
+		if err != nil {
+			http.Error(w, "failed to verify token", http.StatusInternalServerError)
+			return
+		}
+		if savedToken == "" || savedToken != token {
+			http.Error(w, "token revoked", http.StatusUnauthorized)
+			return
+		}
+
+		ctx := context.WithValue(r.Context(), enumeration.UserIDKey, userID)
+		ctx = context.WithValue(ctx, enumeration.RoleKey, claims.Role)
 
 		next(w, r.WithContext(ctx))
 	}

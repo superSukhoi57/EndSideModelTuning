@@ -27,15 +27,18 @@ func NewRefreshTokenLogic(ctx context.Context, svcCtx *svc.ServiceContext) *Refr
 如果refresh_token过期，返回错误
 如果refresh_token不存在redis，返回错误
 */
-func (l *RefreshTokenLogic) RefreshToken(req *types.RefreshTokenReq) (*types.RefreshTokenResp, error) {
+func (l *RefreshTokenLogic) RefreshToken(req *types.RefreshTokenReq, userID int64) (*types.RefreshTokenResp, error) {
 	claims, err := l.svcCtx.JWTMgr.ValidateToken(req.RefreshToken, true)
 	if err != nil {
 		return nil, err
 	}
 
-	userID, err := strconv.ParseInt(claims.UserID, 10, 64)
+	claimedUserID, err := strconv.ParseInt(claims.UserID, 10, 64)
 	if err != nil {
 		return nil, err
+	}
+	if claimedUserID != userID {
+		return nil, types.ErrTokenRevoked
 	}
 
 	savedToken, err := l.svcCtx.TokenDAO.GetRefreshToken(l.ctx, userID)
