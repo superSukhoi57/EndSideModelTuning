@@ -3,6 +3,7 @@ FROM golang:1.25.9-alpine3.22 AS builder
 WORKDIR /build
 COPY . .
 WORKDIR /build/auth
+ENV GOPROXY=https://goproxy.cn,direct
 RUN go mod tidy
 RUN CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -o auth .
 
