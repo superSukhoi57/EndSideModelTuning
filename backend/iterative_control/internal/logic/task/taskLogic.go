@@ -28,13 +28,17 @@ func (l *TaskLogic) Create(req *types.TaskCreateReq) error {
 	if !ok {
 		return fmt.Errorf("missing user id in context")
 	}
-	log.Printf("Create task - UserID: %d", userID)
+	log.Printf("Create task - UserID: %d, MachineID: %d, ParameterID: %d", userID, req.MachineID, req.ParameterID)
 
 	task := &model.Task{
-		ID:          req.ID,
-		ParameterID: req.ParameterID,
-		UserID:      userID,
-		Desc:        req.Desc,
+		ParameterID:    req.ParameterID,
+		UserID:         userID,
+		MachineID:      req.MachineID,
+		MemoryPercent:  req.MemoryPercent,
+		CPUPercent:     req.CPUPercent,
+		CompletionTime: req.CompletionTime,
+		Limit:          req.Limit,
+		Desc:           req.Desc,
 	}
 
 	if err := l.svcCtx.TaskDAO.Create(l.ctx, task); err != nil {
@@ -118,12 +122,17 @@ func (l *TaskLogic) GetByID(id int64) (*types.TaskResp, error) {
 	}
 
 	return &types.TaskResp{
-		ID:          task.ID,
-		ParameterID: task.ParameterID,
-		UserID:      task.UserID,
-		Desc:        task.Desc,
-		CreateAt:    task.CreateAt.Format("2006-01-02 15:04:05"),
-		UpdateAt:    task.UpdateAt.Format("2006-01-02 15:04:05"),
+		ID:             task.ID,
+		ParameterID:    task.ParameterID,
+		UserID:         task.UserID,
+		MachineID:      task.MachineID,
+		MemoryPercent:  task.MemoryPercent,
+		CPUPercent:     task.CPUPercent,
+		CompletionTime: task.CompletionTime,
+		Limit:          task.Limit,
+		Desc:           task.Desc,
+		CreateAt:       task.CreateAt.Format("2006-01-02 15:04:05"),
+		UpdateAt:       task.UpdateAt.Format("2006-01-02 15:04:05"),
 	}, nil
 }
 
@@ -142,12 +151,17 @@ func (l *TaskLogic) List(req *types.TaskListReq) (*types.PageResp, error) {
 	list := make([]types.TaskResp, 0, len(result.List))
 	for _, t := range result.List {
 		list = append(list, types.TaskResp{
-			ID:          t.ID,
-			ParameterID: t.ParameterID,
-			UserID:      t.UserID,
-			Desc:        t.Desc,
-			CreateAt:    t.CreateAt.Format("2006-01-02 15:04:05"),
-			UpdateAt:    t.UpdateAt.Format("2006-01-02 15:04:05"),
+			ID:             t.ID,
+			ParameterID:    t.ParameterID,
+			UserID:         t.UserID,
+			MachineID:      t.MachineID,
+			MemoryPercent:  t.MemoryPercent,
+			CPUPercent:     t.CPUPercent,
+			CompletionTime: t.CompletionTime,
+			Limit:          t.Limit,
+			Desc:           t.Desc,
+			CreateAt:       t.CreateAt.Format("2006-01-02 15:04:05"),
+			UpdateAt:       t.UpdateAt.Format("2006-01-02 15:04:05"),
 		})
 	}
 

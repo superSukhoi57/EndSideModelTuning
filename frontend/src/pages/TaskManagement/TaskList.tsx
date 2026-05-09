@@ -1,31 +1,25 @@
-import React, { useEffect, useState } from 'react';
-import { Table, Button, Modal, Form, Input, InputNumber, Popconfirm, message, Space } from 'antd';
-import { PlusOutlined, EditOutlined, DeleteOutlined, ReloadOutlined } from '@ant-design/icons';
+import React, { useEffect, useState, useCallback } from 'react';
+import { Table, Button, Modal, Form, Input, Popconfirm, message, Space } from 'antd';
+import { EditOutlined, DeleteOutlined, ReloadOutlined } from '@ant-design/icons';
 import { useTask } from '../../hooks/useTask.ts';
 import type { ColumnsType } from 'antd/es/table';
 import type { Task } from '../../services/types.ts';
 
 const TaskList: React.FC = () => {
-    const { loading, listData, createTask, updateTask, deleteTask, listTasks } = useTask();
+    const { loading, listData, updateTask, deleteTask, listTasks } = useTask();
     const [form] = Form.useForm();
     const [modalVisible, setModalVisible] = useState(false);
     const [editingTask, setEditingTask] = useState<Task | null>(null);
     const [page, setPage] = useState(1);
     const [pageSize, setPageSize] = useState(10);
 
+    const fetchData = React.useCallback(() => {
+        listTasks({ page, pageSize });
+    }, [listTasks, page, pageSize]);
+
     useEffect(() => {
         fetchData();
-    }, [page, pageSize]);
-
-    const fetchData = () => {
-        listTasks({ page, pageSize });
-    };
-
-    const handleCreate = () => {
-        setEditingTask(null);
-        form.resetFields();
-        setModalVisible(true);
-    };
+    }, [fetchData]);
 
     const handleEdit = (record: Task) => {
         setEditingTask(record);
@@ -49,9 +43,6 @@ const TaskList: React.FC = () => {
             if (editingTask) {
                 await updateTask({ id: editingTask.id, ...values });
                 message.success('更新成功');
-            } else {
-                await createTask(values);
-                message.success('创建成功');
             }
             setModalVisible(false);
             fetchData();
@@ -68,10 +59,40 @@ const TaskList: React.FC = () => {
             width: 100,
         },
         {
+            title: '机器ID',
+            dataIndex: 'machineid',
+            key: 'machineid',
+            width: 100,
+        },
+        {
             title: '参数ID',
             dataIndex: 'paramterid',
             key: 'paramterid',
             width: 100,
+        },
+        {
+            title: '内存占用(%)',
+            dataIndex: 'memory_percent',
+            key: 'memory_percent',
+            width: 120,
+        },
+        {
+            title: 'CPU使用率(%)',
+            dataIndex: 'cpu_percent',
+            key: 'cpu_percent',
+            width: 120,
+        },
+        {
+            title: '完成时间(s)',
+            dataIndex: 'completion_time',
+            key: 'completion_time',
+            width: 120,
+        },
+        {
+            title: '最大迭代次数',
+            dataIndex: 'limit',
+            key: 'limit',
+            width: 120,
         },
         {
             title: '描述',
@@ -124,9 +145,6 @@ const TaskList: React.FC = () => {
                     <Button icon={<ReloadOutlined />} onClick={fetchData} loading={loading}>
                         刷新
                     </Button>
-                    <Button type="primary" icon={<PlusOutlined />} onClick={handleCreate}>
-                        新增任务
-                    </Button>
                 </Space>
             </div>
             <Table
@@ -145,18 +163,12 @@ const TaskList: React.FC = () => {
                 }}
             />
             <Modal
-                title={editingTask ? '编辑任务' : '新增任务'}
+                title="编辑任务"
                 open={modalVisible}
                 onOk={handleSubmit}
                 onCancel={() => setModalVisible(false)}
             >
                 <Form form={form} layout="vertical">
-                    <Form.Item name="id" label="任务ID" rules={[{ required: true, message: '请输入任务ID' }]}>
-                        <InputNumber style={{ width: '100%' }} disabled={!!editingTask} />
-                    </Form.Item>
-                    <Form.Item name="paramterid" label="参数ID" rules={[{ required: true, message: '请输入参数ID' }]}>
-                        <InputNumber style={{ width: '100%' }} disabled={!!editingTask} />
-                    </Form.Item>
                     <Form.Item name="desc" label="描述">
                         <Input.TextArea />
                     </Form.Item>

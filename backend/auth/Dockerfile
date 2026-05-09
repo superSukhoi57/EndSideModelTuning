@@ -12,7 +12,7 @@ FROM alpine:3.22
 WORKDIR /work
 
 COPY --from=builder /build/auth/auth .
-COPY --from=builder /build/auth/etc/ ./etc/
+COPY --from=builder /build/auth/etc/ ./etc/ 
 
 EXPOSE 12300
 

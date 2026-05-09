@@ -72,7 +72,7 @@ const DeviceManagement: React.FC = () => {
             key: 'core',
         },
         {
-            title: '内存(MB)',
+            title: '内存(GB)',
             dataIndex: 'ram',
             key: 'ram',
         },
@@ -164,13 +164,13 @@ const DeviceManagement: React.FC = () => {
                     <Form.Item name="ip" label="IP地址" rules={[{ required: true, message: '请输入IP地址' }]}>
                         <Input />
                     </Form.Item>
-                    <Form.Item name="pwd" label="密码">
+                    <Form.Item name="pwd" label="密码(注意默认使用root登录!)">
                         <Input.Password />
                     </Form.Item>
                     <Form.Item name="core" label="CPU核心数">
                         <InputNumber style={{ width: '100%' }} />
                     </Form.Item>
-                    <Form.Item name="ram" label="内存(MB)">
+                    <Form.Item name="ram" label="内存(GB)">
                         <InputNumber style={{ width: '100%' }} />
                     </Form.Item>
                     <Form.Item name="memory" label="磁盘(GB)">

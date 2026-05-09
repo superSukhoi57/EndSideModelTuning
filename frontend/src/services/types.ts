@@ -64,14 +64,23 @@ export interface Task {
     id: number;
     paramterid: number;
     userid: number;
+    machineid: number;
+    memory_percent: number;
+    cpu_percent: number;
+    completion_time: number | null;
+    limit: number | null;
     desc: string;
     createAt: string;
     updateAt: string;
 }
 
 export interface TaskCreateReq {
-    id: number;
     paramterid: number;
+    machineid: number;
+    memory_percent: number;
+    cpu_percent: number;
+    completion_time?: number;
+    limit?: number;
     desc?: string;
 }
 

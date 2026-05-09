@@ -96,9 +96,13 @@ type ParameterResp struct {
 }
 
 type TaskCreateReq struct {
-	ID          int64  `json:"id"`
-	ParameterID int64  `json:"paramterid"`
-	Desc        string `json:"desc,omitempty"`
+	ParameterID    int64  `json:"paramterid"`
+	MachineID      int    `json:"machineid"`
+	MemoryPercent  int    `json:"memory_percent"`
+	CPUPercent     int    `json:"cpu_percent"`
+	CompletionTime *int   `json:"completion_time,omitempty"`
+	Limit          *int   `json:"limit,omitempty"`
+	Desc           string `json:"desc,omitempty"`
 }
 
 type TaskUpdateReq struct {
@@ -114,12 +118,17 @@ type TaskListReq struct {
 }
 
 type TaskResp struct {
-	ID          int64  `json:"id"`
-	ParameterID int64  `json:"paramterid"`
-	UserID      int64  `json:"userid"`
-	Desc        string `json:"desc"`
-	CreateAt    string `json:"createAt"`
-	UpdateAt    string `json:"updateAt"`
+	ID             int64  `json:"id"`
+	ParameterID    int64  `json:"paramterid"`
+	UserID         int64  `json:"userid"`
+	MachineID      int    `json:"machineid"`
+	MemoryPercent  int    `json:"memory_percent"`
+	CPUPercent     int    `json:"cpu_percent"`
+	CompletionTime *int   `json:"completion_time"`
+	Limit          *int   `json:"limit"`
+	Desc           string `json:"desc"`
+	CreateAt       string `json:"createAt"`
+	UpdateAt       string `json:"updateAt"`
 }
 
 type ResultCreateReq struct {

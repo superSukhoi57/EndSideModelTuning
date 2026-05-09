@@ -6,18 +6,30 @@ import (
 
 	"iterative_control/internal/model"
 
+	"github.com/bwmarrin/snowflake"
 	"gorm.io/gorm"
 )
 
 type TaskDAO struct {
-	db *gorm.DB
+	db        *gorm.DB
+	snowflake *snowflake.Node
 }
 
 func NewTaskDAO(db *gorm.DB) *TaskDAO {
-	return &TaskDAO{db: db}
+	node, err := snowflake.NewNode(1)
+	if err != nil {
+		panic(fmt.Sprintf("failed to create snowflake node: %v", err))
+	}
+	return &TaskDAO{
+		db:        db,
+		snowflake: node,
+	}
 }
 
 func (d *TaskDAO) Create(ctx context.Context, task *model.Task) error {
+	if task.ID == 0 {
+		task.ID = d.snowflake.Generate().Int64()
+	}
 	if err := d.db.WithContext(ctx).Create(task).Error; err != nil {
 		return fmt.Errorf("failed to create task: %w", err)
 	}
